@@ -4,7 +4,7 @@ import { useTranslation } from "../LanguageContext";
 import { 
   LayoutDashboard, Activity, Hammer, FileText, Blocks, Settings, User, 
   Plus, Shield, Key, History, Users, Monitor, Trash2, ChevronDown, Zap,
-  Menu, X
+  Globe, Menu, X
 } from 'lucide-react';
 
 const AccountDashboard = () => {
@@ -128,7 +128,7 @@ const AccountDashboard = () => {
               <div className="grid grid-cols-2 gap-6">
                 <InputGroup label={t("account.fullName")} value={t("common.userName")} />
                 <InputGroup label={t("account.emailAddress")} value="alex.rivero@axiom-logic.io" />
-                <SelectGroup label={t("account.language")} value={t("account.languageValues")} />
+                <SelectGroup label={t("account.language")} value={t("account.languageValues")} /> 
                 <SelectGroup label={t("account.timezone")} value={t("account.timezoneValue")} />
               </div>
             </div>
@@ -141,11 +141,11 @@ const AccountDashboard = () => {
                   <span className="text-sm font-semibold">{t("account.securityScore")}</span>
                 </div>
                 <div className="flex items-baseline gap-1 mb-2">
-                  <span className="text-4xl font-bold">92</span>
+                  <span className="text-4xl font-bold">0</span>
                   <span className="text-blue-300 text-sm">/ 100</span>
                 </div>
                 <div className="w-full bg-blue-800 h-1.5 rounded-full mb-4">
-                  <div className="bg-green-400 h-full w-[92%] rounded-full"></div>
+                  <div className="bg-green-400 h-full w-[0%] rounded-full"></div>
                 </div>
                 <p className="text-[10px] text-blue-200 uppercase tracking-tighter">{t("account.securityDesc")}</p>
               </div>
@@ -164,13 +164,12 @@ const AccountDashboard = () => {
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h3 className="font-bold text-lg">{t("account.teamTitle")}</h3>
-                  <p className="text-[11px] text-slate-400">{t("account.managingTeam")}</p>
+                  <p className="text-[11px] text-slate-400">0 engineers active</p>
                 </div>
                 <button className="p-2 text-blue-700 bg-blue-50 rounded-md"><Users size={18} /></button>
               </div>
               <div className="space-y-3">
-                <TeamMember name={t("account.sarahName")} role={t("account.sarahRole")} badge={t("account.adminBadge")} color="bg-slate-800" />
-                <TeamMember name={t("account.marcusName")} role={t("account.marcusRole")} badge={t("account.memberBadge")} color="bg-yellow-600" />
+                <p className="text-xs text-slate-400 italic">No team members found.</p>
               </div>
             </div>
 
@@ -184,11 +183,7 @@ const AccountDashboard = () => {
                <div className="mt-6">
                   <p className="text-[10px] font-bold text-slate-400 mb-3 uppercase tracking-widest">{t("account.activeSessions")}</p>
                   <div className="bg-white border border-slate-200 p-3 rounded-lg flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                      <div className="w-2 h-2 bg-slate-400 rounded-sm"></div>
-                      <span className="text-sm text-slate-600">{t("account.sessionBrowser")}</span>
-                    </div>
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-xs text-slate-400 italic">Current session active</span>
                   </div>
                </div>
             </div>
@@ -210,9 +205,10 @@ const AccountDashboard = () => {
                 <div>
                   <div className="flex items-center gap-2 mb-4">
                     <span className="text-blue-700">❄</span>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest">{t("account.nodeDist")}</h4>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mb-4 leading-relaxed">{t("account.nodeDistDesc")}</p>
+                    <Globe size={16} className="text-blue-700" />
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest">{t("account.nodeDist")}</h4> 
+                  </div> 
+                  <p className="text-[11px] text-slate-400 mb-4 leading-relaxed">{t("account.nodeDistDesc")}</p> 
                   <div className="flex flex-wrap gap-2">
                     <RegionBadge label={t("account.usEast")} active />
                     <RegionBadge label={t("account.euCentral")} />
@@ -223,9 +219,9 @@ const AccountDashboard = () => {
                 <div>
                    <div className="flex items-center gap-2 mb-4">
                     <span className="text-blue-700">⚡</span>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest">{t("account.autoScaleThreshold")}</h4>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mb-8 leading-relaxed">{t("account.autoScaleThresholdDesc")}</p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest">{t("account.autoScaleThreshold")}</h4> 
+                  </div> 
+                  <p className="text-[11px] text-slate-400 mb-8 leading-relaxed">{t("account.autoScaleThresholdDesc")}</p> 
                   <input type="range" className="w-full h-1 bg-slate-100 appearance-none rounded-full accent-blue-700" />
                   <div className="flex justify-between mt-2 text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
                     <span>{t("account.precision")}</span>
@@ -236,9 +232,9 @@ const AccountDashboard = () => {
                 <div>
                    <div className="flex items-center gap-2 mb-4">
                     <span className="text-blue-700">📊</span>
-                    <h4 className="text-[10px] font-bold uppercase tracking-widest">{t("account.dataRetention")}</h4>
-                  </div>
-                  <p className="text-[11px] text-slate-400 mb-4 leading-relaxed">{t("account.dataRetentionDesc")}</p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest">{t("account.dataRetention")}</h4> 
+                  </div> 
+                  <p className="text-[11px] text-slate-400 mb-4 leading-relaxed">{t("account.dataRetentionDesc")}</p> 
                   <div className="flex items-center gap-3">
                     <div className="w-16 border-b-2 border-blue-700 pb-1 text-center font-bold text-slate-700">30</div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase">{t("common.days")}</span>
@@ -321,8 +317,8 @@ const NotificationPanel = ({ isOpen, onClose }) => {
         <p className="text-[10px] font-black text-blue-600 uppercase mb-1">{t("notifications.systemUpdate")}</p>
         <p className="text-xs font-bold text-slate-800">{t("notifications.deployed")}</p>
       </div>
-      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-        <p className="text-[10px] font-black text-slate-500 uppercase mb-1">{t("sidebar.account")}</p>
+      <div className="p-3 bg-slate-50 rounded-xl border border-slate-100"> 
+        <p className="text-[10px] font-black text-slate-500 uppercase mb-1">{t("settings.security")}</p>
         <p className="text-xs font-bold text-slate-800">{t("notifications.apiKeyGenerated")}</p>
       </div>
     </div>
@@ -344,10 +340,10 @@ const SupportPanel = ({ isOpen, onClose }) => {
       <div>
         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">{t("support.quickLinks")}</h4>
         <div className="space-y-2">
-          <a href="#" className="flex items-center justify-between p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all group">
+          <a href="#" className="flex items-center justify-between p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all group"> 
             {t("header.docs")} <ChevronDown size={14} className="-rotate-90 opacity-0 group-hover:opacity-100 transition-all" />
           </a>
-          <a href="#" className="flex items-center justify-between p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all group">
+          <a href="#" className="flex items-center justify-between p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all group"> 
             {t("support.apiReference")} <ChevronDown size={14} className="-rotate-90 opacity-0 group-hover:opacity-100 transition-all" />
           </a>
         </div>

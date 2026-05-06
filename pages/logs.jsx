@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from "../LanguageContext";
+import { api } from "../service/api";
 import { 
   LayoutDashboard, Activity, Hammer, FileText, Blocks, Settings, 
   Search, Plus, X, AlertCircle, RotateCcw, Copy, ChevronRight,
@@ -17,15 +18,16 @@ const ExecutionLogs = () => {
   const [showSupport, setShowSupport] = useState(false);
   const [isReRunning, setIsReRunning] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
+  const [logsData, setLogsData] = useState([]);
+  const [selectedLog, setSelectedLog] = useState(null);
   const navigate = useNavigate();
 
-  const logsData = useMemo(() => [
-    { id: "exec_84x2_a98", name: "logs.data.dataSync", env: "Production • v1.2", time: "Oct 24, 2023, 14:02:12" },
-    { id: "exec_12p0_v44", name: "logs.data.userOnboarding", env: "Staging • v4.0-rc", time: "Oct 24, 2023, 13:58:45", active: true },
-    { id: "exec_92kL_r11", name: "logs.data.billingCalc", env: "Production • v2.1", time: "Oct 24, 2023, 13:45:10" },
-    { id: "exec_00f8_z92", name: "logs.data.inventoryMonitor", env: "Production • v1.0", time: "Oct 24, 2023, 13:30:22" },
-    { id: "exec_44h3_m33", name: "logs.data.slackRelay", env: "Production • v3.4", time: "Oct 24, 2023, 13:12:01" },
-  ], []);
+  useEffect(() => {
+    api.getLogs().then(data => {
+      setLogsData(data);
+      if (data.length > 0) setSelectedLog(data[0]);
+    }).catch(err => console.error("Failed to fetch logs", err));
+  }, []);
 
   const filteredLogs = useMemo(() => {
     return logsData.filter(log => 
@@ -124,17 +126,17 @@ const ExecutionLogs = () => {
             <div className="bg-[#eef2ff]/40 p-6 rounded-2xl border border-blue-50">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t("logs.stats.rate")}</p>
                 <div className="flex items-baseline gap-3">
-                    <span className="text-3xl font-black">98.4%</span>
-                    <span className="text-green-500 text-xs font-bold">↑ 0.2%</span>
+                    <span className="text-3xl font-black">0%</span>
+                    <span className="text-green-500 text-xs font-bold">↑ 0%</span>
                 </div>
             </div>
             <div className="bg-[#eef2ff]/40 p-6 rounded-2xl border border-blue-50">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t("logs.stats.total")}</p>
-                <span className="text-3xl font-black">12,842</span>
+                <span className="text-3xl font-black">{logsData.length}</span>
             </div>
             <div className="bg-[#eef2ff]/40 p-6 rounded-2xl border border-blue-50">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t("logs.stats.duration")}</p>
-                <span className="text-3xl font-black">1.2s</span>
+                <span className="text-3xl font-black">0s</span>
             </div>
           </div>
 
@@ -170,7 +172,7 @@ const ExecutionLogs = () => {
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
               <div>
                 <h3 className="text-lg font-black text-slate-900">{t("logs.details.title")}</h3>
-                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tighter">{t("common.id")}: exec_12p0_v44</p>
+                <p className="text-[10px] font-bold text-blue-600 uppercase tracking-tighter">{t("common.id")}: {selectedLog?.id}</p>
               </div>
               <button onClick={() => setIsPanelOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors">
                 <X size={20} className="text-slate-400" />
@@ -179,6 +181,7 @@ const ExecutionLogs = () => {
 
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Error Alert */}
+              {selectedLog?.isFailed && (
               <div className="bg-white border border-red-100 rounded-xl p-4 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white">
@@ -186,20 +189,21 @@ const ExecutionLogs = () => {
                   </div>
                   <div>
                     <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">{t("logs.details.failed")}</p>
-                    <p className="text-xs font-bold text-slate-600">{t("common.step")}: 'Database_Update_01'</p>
+                    <p className="text-xs font-bold text-slate-600">{t("common.step")}: {selectedLog?.failedStep || 'Unknown'}</p>
                   </div>
                 </div>
                 <button onClick={handleReRun} className="text-[10px] font-black text-blue-700 uppercase flex items-center gap-1 hover:text-blue-900 transition-colors">
                     <RotateCcw size={12} className={isReRunning ? 'animate-spin' : ''}/> {isReRunning ? t("common.retrying") : t("logs.details.rerun")}
                 </button>
               </div>
+              )}
 
               {/* Info Grid */}
               <div className="grid grid-cols-2 gap-4">
-                <InfoBox label={t("logs.details.env")} value={t("logs.envs.staging")} />
-                <InfoBox label={t("logs.details.version")} value="v18.4.1" />
-                <InfoBox label={t("logs.details.source")} value={t("logs.sources.webhook")} />
-                <InfoBox label={t("logs.details.retries")} value={`3 ${t("common.of")} 3`} />
+                <InfoBox label={t("logs.details.env")} value={t(selectedLog?.env)} />
+                <InfoBox label={t("logs.details.version")} value={selectedLog?.version || 'N/A'} />
+                <InfoBox label={t("logs.details.source")} value={t(selectedLog?.source)} />
+                <InfoBox label={t("logs.details.retries")} value={`${selectedLog?.retries || 0} ${t("common.of")} 3`} />
               </div>
 
               {/* Payload Section */}
@@ -211,34 +215,27 @@ const ExecutionLogs = () => {
                   </button>
                 </div>
                 <pre className="bg-[#232a3b] text-blue-100 p-4 rounded-xl text-[11px] font-mono leading-relaxed overflow-x-auto">
-{`{
-  "user_id": "usr_99823",
-  "action": "onboarding_complete",
-  "metadata": {
-    "device": "macOS-14.1",
-    "browser": "Chrome-118"
-  }
-}`}
+                  {JSON.stringify(selectedLog?.payload || {}, null, 2)}
                 </pre>
               </div>
 
               {/* Error Message */}
+              {selectedLog?.error && (
               <div>
                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">{t("logs.details.errorMsg")}</p>
                  <div className="bg-red-50 border border-red-100 p-4 rounded-xl">
-                    <p className="text-[11px] font-mono text-red-700 leading-normal">
-                        TypeError: Cannot read properties of undefined (reading 'db_connection') at Database_Update_01.run (index.js:42:15) at WorkflowEngine.execute (engine.js:102:22)
-                    </p>
+                    <p className="text-[11px] font-mono text-red-700 leading-normal">{selectedLog.error}</p>
                  </div>
               </div>
+              )}
 
               {/* Execution Steps Timeline */}
               <div>
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{t("logs.details.steps")}</p>
                 <div className="space-y-6 relative ml-2">
-                    <TimelineStep name="Webhook_Receiver_01" status={t("common.success")} time="12ms" active />
-                    <TimelineStep name="Validate_User_Auth" status={t("common.success")} time="45ms" active />
-                    <TimelineStep name="Database_Update_01" status={t("common.failed")} time="3ms" isLast isError />
+                   {selectedLog?.steps?.map((step, idx) => (
+                     <TimelineStep key={idx} name={step.name} status={t(`common.${step.status}`)} time={step.duration} isLast={idx === selectedLog.steps.length - 1} isError={step.status === 'failed'} />
+                   ))}
                 </div>
               </div>
             </div>
@@ -250,7 +247,7 @@ const ExecutionLogs = () => {
                 className="flex-1 bg-[#0061E0] text-white py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest active:scale-95 transition-transform"
               >
                 {isExecuting ? t("common.processing") : t("logs.details.reexecute")}
-              </button>
+              </button> 
               <button onClick={() => navigate('/builder')} className="flex-1 bg-blue-50 text-blue-700 py-2.5 rounded-lg text-xs font-bold uppercase tracking-widest active:scale-95 transition-transform">
                 {t("logs.details.viewBuilder")}
               </button>
@@ -276,11 +273,11 @@ const NotificationPanel = ({ isOpen, onClose }) => {
       <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">{t("notifications.title")}</h3>
       <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><X size={18} /></button>
     </div>
-    <div className="flex-1 overflow-y-auto p-4 space-y-3">
+    <div className="flex-1 overflow-y-auto p-4 space-y-3"> 
       <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100">
         <p className="text-[10px] font-black text-blue-600 uppercase mb-1">{t("notifications.systemUpdate")}</p>
         <p className="text-xs font-bold text-slate-800">{t("notifications.deployed")}</p>
-      </div>
+      </div> 
       <div className="p-3 bg-red-50/50 rounded-xl border border-red-100">
         <p className="text-[10px] font-black text-red-600 uppercase mb-1">{t("notifications.executionAlert")}</p>
         <p className="text-xs font-bold text-slate-800">{t("notifications.latencyDetected")}</p>

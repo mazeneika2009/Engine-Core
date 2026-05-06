@@ -208,7 +208,7 @@ const PlatformSettings = () => {
             <div className="flex items-center gap-2 mb-1">
               <span className="bg-green-100 text-green-700 text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest">
                 {t("common.active")}
-              </span>
+              </span> 
               <span className="text-[10px] text-slate-400 font-bold">
                 {t('common.lastConfigured', { time: t('2h ago') })} 
               </span>
@@ -216,7 +216,7 @@ const PlatformSettings = () => {
             <h2 className="text-3xl font-black text-slate-900 tracking-tight">
               {t("settings.title")}
             </h2>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm text-slate-500 mt-1"> 
               {t("settings.subtitle")}
             </p>
           </div>
@@ -250,7 +250,7 @@ const PlatformSettings = () => {
                     value={lang}
                     onChange={(e) => setLang(e.target.value)}
                     // The options themselves are usually displayed in their native language
-                    // or a common English name for selection purposes.
+                    // or a common English name for selection purposes. 
                     // The `t()` function is used for the label, not the option text.
                     // If you need to translate the option text, you'd add keys like "language.english"
                     className="border border-slate-200 rounded-lg p-2.5 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-600 focus:outline-none w-full"
@@ -263,7 +263,7 @@ const PlatformSettings = () => {
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     {t("settings.timeLabel")}
                   </label> 
-                  <input type="time" className="border border-slate-200 rounded-lg p-2.5 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-600 focus:outline-none w-full" placeholder={t("settings.timePlaceholder")} />
+                  <input type="time" className="w-full border border-slate-200 rounded-lg p-2.5 text-sm font-bold text-slate-700 focus:ring-2 focus:ring-blue-600 focus:outline-none w-full" placeholder={t("settings.timePlaceholder")} /> 
                 </div>
               </div>
               <div className="mt-8 pt-6 border-t border-slate-50 flex justify-end">
@@ -396,39 +396,22 @@ const PlatformSettings = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  <ApiRow
-                    name="settings.apiData.prodEngine"
-                    keyval="pk_live_••••••••••••x34z"
-                    last="time"
-                    status="ACTIVE"
-                  />
-                  <ApiRow
-                    name="settings.apiData.stagingEngine"
-                    keyval="pk_test_••••••••••••99kL"
-                    last="common.yesterday"
-                    status="IDLE"
-                  />
-                  <ApiRow
-                    name="settings.apiData.discordBot"
-                    keyval="pk_live_••••••••••••fR55"
-                    last="time"
-                    status="REVOKED"
-                  />
+                  {/* API keys will appear here */}
                 </tbody>
               </table>
             </div>
           </div>
 
-          <div className="grid grid-cols-12 gap-8 items-start pb-12">
-            {/* Billing Summary */}
+          {/* Billing & Usage */}
+          <div className="grid grid-cols-12 gap-8 items-start">
             <div className="col-span-7 bg-white rounded-2xl border border-slate-100 p-8 shadow-sm">
-              <div className="flex justify-between items-start mb-8">
+              <div className="flex justify-between items-center mb-8">
                 <div>
-                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                  <h3 className="text-xl font-black text-slate-900 tracking-tight">
                     {t("settings.billingTitle")}
                   </h3>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tight mt-1">
-                    {t("settings.billingSubtitle")}
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                    {t("settings.currentPlan")}
                   </p>
                 </div>
                 <div className="w-12 h-10 bg-slate-100 rounded-lg" />
@@ -438,60 +421,45 @@ const PlatformSettings = () => {
                 <div>
                   <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
                     <span>{t("settings.workflowExecutions")}</span>
-                    <span className="text-slate-800">82,400 / 100,000</span>
+                    <span className="text-slate-800">0 / 100,000</span>
                   </div>
                   <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-blue-600 rounded-full"
-                      style={{ width: "82%" }}
+                      style={{ width: "0%" }}
                     ></div>
                   </div>
                 </div>
                 <div>
                   <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
                     <span>{t("settings.dataStorage")}</span>
-                    <span className="text-slate-800">4.2 GB / 10 GB</span>
+                    <span className="text-slate-800">0 GB / 10 GB</span>
                   </div>
                   <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-green-600 rounded-full"
-                      style={{ width: "42%" }}
+                      style={{ width: "0%" }}
                     ></div>
                   </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <button className="bg-blue-50 text-blue-700 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-100 transition-colors">
-                  {t("settings.updatePayment")}
+                <button className="border border-slate-200 text-slate-600 py-3 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-colors">
+                  {t("settings.managePayment")}
                 </button>
                 <button className="bg-blue-600 text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-blue-100 hover:bg-blue-700 transition-colors">
                   {t("settings.upgradePlan")}
                 </button>
               </div>
             </div>
-
             {/* Transaction History */}
             <div className="col-span-5">
               <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">
                 {t("settings.transactionHistory")}
               </p>
               <div className="space-y-4">
-                <TransactionRow
-                  id="INV-0914-22"
-                  date="Sept 12, 2024"
-                  amount="$149.00"
-                />
-                <TransactionRow
-                  id="INV-0814-22"
-                  date="Aug 12, 2024"
-                  amount="$149.00"
-                />
-                <TransactionRow
-                  id="INV-0714-22"
-                  date="July 12, 2024"
-                  amount="$149.00"
-                />
+                 {/* Transaction history will appear here */}
               </div>
             </div>
           </div>
@@ -501,7 +469,7 @@ const PlatformSettings = () => {
   );
 };
 
-const NotificationPanel = ({ isOpen, onClose }) => {
+const NotificationPanel = ({ isOpen, onClose, setShowNotifications }) => {
   const { t } = useTranslation();
   return (
     <div
@@ -528,7 +496,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
           </p>
         </div>
         <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-          <p className="text-[10px] font-black text-slate-500 uppercase mb-1">
+          <p className="text-[10px] font-black text-slate-500 uppercase mb-1"> 
             {t("sidebar.account")}
           </p>
           <p className="text-xs font-bold text-slate-800">
@@ -640,13 +608,13 @@ const TemplatesPanel = ({ isOpen, onClose }) => {
           <div
             key={templateName}
             className="p-4 border border-slate-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/30 transition-all cursor-pointer group"
-          >
-            <p className="text-xs font-black text-blue-600 uppercase mb-1">
-              Standard
-            </p>
+          > 
+            <p className="text-xs font-black text-blue-600 uppercase mb-1"> 
+              {t("templatesPanel.standard")}
+            </p> 
             <p className="text-sm font-bold text-slate-800">{templateName}</p>
             <p className="text-[10px] text-slate-400 mt-2">
-              {t("workflows.tips.desc")}
+              {t("templatesPanel.desc")}
             </p>
           </div>
         ))}
@@ -661,7 +629,7 @@ const MarketplacePanel = ({ isOpen, onClose }) => {
     <div
       className={`fixed inset-y-0 right-0 w-96 bg-[#121826] shadow-2xl z-[150] flex flex-col transition-transform duration-300 transform ${isOpen ? "translate-x-0" : "translate-x-full"}`}
     >
-      <div className="p-6 border-b border-slate-800 flex justify-between items-center">
+      <div className="p-6 border-b border-slate-800 flex justify-between items-center"> 
         <h3 className="text-sm font-black text-white uppercase tracking-widest">
           {t("account.marketplaceTitle")}
         </h3>
@@ -669,15 +637,15 @@ const MarketplacePanel = ({ isOpen, onClose }) => {
           onClick={onClose}
           className="p-2 hover:bg-slate-800 rounded-full text-slate-500"
         >
-          <X size={18} />
+          <X size={18} /> 
         </button>
       </div>
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
         <div className="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center text-blue-400 mb-4">
           <Zap size={32} />
         </div>
-        <h4 className="text-white font-black text-lg">{t("common.comingSoon")}</h4>
-        <p className="text-slate-400 text-xs mt-2 leading-relaxed">
+        <h4 className="text-white font-black text-lg">{t("common.comingSoon")}</h4> 
+        <p className="text-slate-400 text-xs mt-2 leading-relaxed"> 
           {t("account.marketplaceDesc")}
         </p>
         <button className="mt-6 w-full py-2.5 bg-blue-600 text-white rounded-lg text-xs font-black uppercase tracking-widest">
@@ -694,7 +662,7 @@ const StatusPanel = ({ isOpen, onClose }) => {
     <div
       className={`fixed inset-y-0 right-0 w-80 bg-white shadow-2xl z-[150] border-l border-slate-100 flex flex-col transition-transform duration-300 transform ${isOpen ? "translate-x-0" : "translate-x-full"}`}
     >
-      <div className="p-6 border-b border-slate-50 flex justify-between items-center">
+      <div className="p-6 border-b border-slate-50 flex justify-between items-center"> 
         <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">
           {t("sidebar.status")}
         </h3>
@@ -702,25 +670,25 @@ const StatusPanel = ({ isOpen, onClose }) => {
           onClick={onClose}
           className="p-2 hover:bg-slate-50 rounded-full text-slate-400"
         >
-          <X size={18} />
+          <X size={18} /> 
         </button>
       </div>
       <div className="p-6 space-y-6">
         <div>
-          <div className="flex justify-between items-center mb-2">
+          <div className="flex justify-between items-center mb-2"> 
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
               {t("dashboard.uptime")}
             </span>
-            <span className="text-xs font-bold text-green-600">99.9%</span>
-          </div>
-          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+            <span className="text-xs font-bold text-green-600">99.9%</span> 
+          </div> 
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden"> 
             <div className="h-full bg-green-500 w-[99%]"></div>
-          </div>
+          </div> 
         </div>
         <div className="space-y-3">
           {["US-East Cluster", "EU-West Cluster", "Global CDN"].map((reg) => (
             <div key={reg} className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-600">{reg}</span>
+              <span className="text-xs font-bold text-slate-600">{t(`projects.clusterStatus.${reg}`)}</span>
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             </div>
           ))}

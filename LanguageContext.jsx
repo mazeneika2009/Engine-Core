@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { api } from './service/api';
 
 const LanguageContext = createContext();
 
@@ -42,9 +43,9 @@ const translations = {
       search: "Search...",
       viewAll: "View All",
       adminAccess: "Admin Access",
-      userName: "Alex Rivero",
+      userName: "User Name",
       adminUser: "Admin User",
-      adminEmail: "admin@precision.io",
+      adminEmail: "user@example.com",
       of: "of",
       results: "results",
       step: "Step",
@@ -87,10 +88,10 @@ const translations = {
       deployingMsg: "Applying configuration and deploying...",
       privacy: "Privacy",
       apiTitle: "API Credentials",
-      apiSubtitle: "Manage secure keys for third-party integrations.",
+      apiSubtitle: "",
       billingTitle: "Billing Summary",
-      billingSubtitle: "Professional Plus Tier • Next bill on Oct 12, 2024",
-      nextBill: "Next bill on Oct 12, 2024",
+      billingSubtitle: "",
+      nextBill: "",
       upgradePlan: "Upgrade Plan",
       security: "Security",
       dataScrubbing: "Data Scrubbing",
@@ -102,11 +103,6 @@ const translations = {
       identityName: "Identity Name",
       secretKey: "Secret Key",
       lastInvocation: "Last Invocation",
-      apiData: {
-        prodEngine: "Main Production Engine",
-        stagingEngine: "Staging Development Environment",
-        discordBot: "Discord Webhook Bot"
-      },
       systemSynced: "System Synced",
       workflowExecutions: "Workflow Executions",
       dataStorage: "Data Storage",
@@ -126,12 +122,6 @@ const translations = {
       nodesOptimal: "All nodes performing within optimal parameters",
       noRecent: "No recent executions found.",
       successRateTitle: "Success Rate (Last 7 Days)",
-      data: {
-        slackBridge: "Slack Notification Bridge",
-        dataSync: "Customer Data Sync",
-        billingAuto: "Monthly Billing Auto-Gen",
-        stripeWebhook: "Stripe Webhook Handler"
-      },
       stats: {
         workflows: "TOTAL WORKFLOWS",
         executions: "TOTAL EXECUTIONS",
@@ -174,11 +164,19 @@ const translations = {
         noResults: "No results found for"
       },
       data: {
-        dataSync: "Data Sync Engine",
+        dataSync: "Cloud Data Sync",
         userOnboarding: "User Onboarding Flow",
         billingCalc: "Billing Calculator",
         inventoryMonitor: "Inventory Monitor",
-        slackRelay: "Slack Notification Relay"
+        slackRelay: "Slack Relay Engine"
+      },
+      envs: {
+        production: "Production",
+        staging: "Staging"
+      },
+      sources: {
+        webhook: "Webhook",
+        schedule: "Schedule"
       },
       details: {
         title: "Execution Details",
@@ -192,7 +190,8 @@ const translations = {
         copyJson: "Copy JSON",
         errorMsg: "Error Message",
         steps: "Execution Steps",
-        reexecute: "Re-execute"
+        reexecute: "Re-execute",
+        viewBuilder: "View in Builder"
       }
     },
     projects: {
@@ -201,19 +200,6 @@ const translations = {
       createBtn: "Create New Project",
       searchPlaceholder: "Search projects or tags...",
       defaultTag: "Active",
-      neural: {
-        title: "Neural Feed Pulse",
-        desc: "Automated sentiment analysis pipeline for global market signals.",
-        load: "System Load",
-        api: "API Response",
-        vectors: "Vector Sync"
-      },
-      health: {
-        title: "Engine Health Status",
-        cluster: "Main Alpha Cluster",
-        bus: "Event Message Bus",
-        db: "Persistent DB Layer"
-      },
       terminal: {
         title: "System Log Terminal"
       },
@@ -228,7 +214,10 @@ const translations = {
         operational: "Operational",
         optimized: "Optimized",
         lastSync: "Last synced {{time}} ago",
-        active: "Active"
+        active: "Active",
+        usEastCluster: "US-East Cluster",
+        euWestCluster: "EU-West Cluster",
+        globalCdn: "Global CDN"
       },
       details: {
         workflows: "Active Workflows",
@@ -240,27 +229,25 @@ const translations = {
         settings: "Settings",
         openDash: "Open Dashboard"
       },
-      data: {
-        logistics: "Global Logistics",
-        logisticsDesc: "Supply chain management and route optimization.",
-        cyber: "Cyber Threat Intel",
-        cyberDesc: "Automated threat detection and IP blocking protocols.",
-        cloud: "Multi-Cloud Relay",
-        cloudDesc: "Real-time sync across AWS and Azure instances.",
-        routeOptimizer: "Route Optimizer",
-        invoiceGen: "Invoice Generator",
-        compliance: "Compliance Checker"
-      },
       tags: { high: "High Priority" },
       alerts: { failedLogs: "Failed Logs Detected" },
       badges: { syncing: "Syncing" },
-      createCard: { title: "New Project", subtitle: "Initialize empty node workspace" },
       terminalLogs: {
-        nodeOk: "All nodes performing optimally.",
-        sslOk: "SSL certificates verified.",
-        collabOk: "New handshake successful.",
-        checkOk: "Health check passed."
+        collabOk: "Collaboration nodes operational."
       },
+      health: {
+          title: "System Health"
+        },
+      templatesPanel: {
+        standard: "Standard",
+        desc: "Ready to deploy automation sequence."
+      },
+      neural: {
+        title: "Neural Feed",
+        desc: "Real-time engine activity monitoring and node performance analytics.",
+        load: "System Load"
+      },
+      createCard: { title: "New Project", subtitle: "" },
       modal: { title: "Create Project", name: "Project Name", namePlace: "e.g. Global Logistics", desc: "Description", descPlace: "Goals...", tag: "Initial Tag", tagPlace: "e.g. Production", submit: "Create Project" }
     },
     workflows: {
@@ -317,6 +304,9 @@ const translations = {
       teamTitle: "Team Management",
       workspaceEnv: "Workspace Environment",
       nodeDist: "Node Distribution",
+      usEast: "US-East",
+      euCentral: "EU-Central",
+      apSoutheast: "AP-Southeast",
       dataRetention: "Data Retention",
       dangerZone: "Danger Zone",
       terminate: "Terminate Account",
@@ -351,23 +341,15 @@ const translations = {
       marketplaceDesc: "Discover community nodes and logic blocks.",
       getNotified: "Get Notified",
       dangerZoneDesc: "Permanently delete workspace and all nodes.",
-      nodeDistDesc: "Distribute compute resources across multiple geographic regions for high availability and low latency.",
+      nodeDistDesc: "Distribute compute resources across multiple geographic regions to ensure high availability and low latency.",
       activeSessions: "Active Sessions",
-      sessionBrowser: "Chrome on MacOS — London, UK",
-      sarahName: "Sarah Chen",
-      sarahRole: "Senior Frontend Engineer",
-      marcusName: "Marcus Thorne",
-      marcusRole: "Backend Developer",
       adminBadge: "ADMIN",
       memberBadge: "MEMBER",
-      usEast: "us-east-1",
-      euCentral: "eu-central-1",
-      apSoutheast: "ap-southeast-1",
       languageValues: "English, Arabic",
-      timezoneValue: "GMT+02:00 (Cairo)"
+      timezoneValue: "UTC -05:00 (EST)"
     },
     builder: {
-      defaultName: "New Automation Flow",
+      defaultName: "New Flow",
       deploy: "Deploy",
       customerEmail: "customer_email",
       orderId: "order_id",
@@ -386,6 +368,17 @@ const translations = {
       greaterThan: "Greater Than",
       val: "VAL",
       logicConfig: "Logic Configuration",
+      nodeFields: {
+        url: "Webhook URL",
+        method: "HTTP Method",
+        headers: "Headers",
+        body: "Request Body",
+        cron: "Schedule (Cron)",
+        code: "Script Editor",
+        retries: "Retry Count",
+        timeout: "Timeout (ms)",
+        placeholder: "Enter value..."
+      },
       library: "Node Library",
       triggers: "Triggers",
       logic: "Logic",
@@ -399,24 +392,39 @@ const translations = {
       },
       nodesList: {
         webhookTrigger: "Webhook Trigger",
-        paymentFailed: "payment.failed",
-        configureStep: "Configure step...",
         webhook: "Webhook",
         schedule: "Schedule",
-        javascript: "JavaScript",
-        conditional: "Conditional",
+        javascript: "JavaScript / Code",
+        conditional: "Conditional (If/Else)",
         sendEmail: "Send Email",
         slackMessage: "Slack Message",
-        database: "Database",
-        jsonTransform: "JSON Transform"
+        database: "Database Operation",
+        jsonTransform: "JSON Transform",
+        http: "HTTP Request",
+        ai: "AI / Bot Assistant",
+        notification: "System Notification",
+        filter: "Data Filter",
+        wait: "Wait / Delay",
+        googleDrive: "Google Drive",
+        chatgpt: "OpenAI ChatGPT",
+        discord: "Discord Message",
+        telegram: "Telegram Bot",
+        paymentFailed: "Payment Failed Event",
+        configureStep: "Configure step..."
       },
       properties: "Properties",
       test: "Test",
-      save: "Save"
+      save: "Save",
+      configActive: "Configuration Active",
+      requiresSetup: "Requires Setup"
     },
     notifications: {
       title: "Notifications",
       systemUpdate: "System Update",
+        executionAlert: "Execution Alert",
+        latencyDetected: "High latency detected in Alpha cluster.",
+        apiKeyGenerated: "New API key generated.",
+        timeRecent: "Just now",
       deployed: "Engine v2.4.0 deployed successfully.",
       time2h: "2 hours ago",
       builder: "Builder",
@@ -424,13 +432,10 @@ const translations = {
       executionError: "Execution Error",
       failedMsg: "Customer Data Sync failed.",
       markRead: "Mark all as read",
-      apiKeyGenerated: "New API key generated.",
-      timeRecent: "Just now",
-      executionAlert: "Execution Alert",
-      latencyDetected: "High latency detected in Alpha cluster."
     },
     support: {
       title: "Support Center",
+        community: "Community",
       quickLinks: "Quick Links",
       apiReference: "API Reference",
       contactUs: "Contact Us",
@@ -438,35 +443,8 @@ const translations = {
       supportAvailability: "Our support team is available 24/7.",
       chatBtn: "Chat with Support",
       systemStatus: "System Status",
-      nominal: "All Systems Nominal",
-      community: "Community"
+      nominal: "All Systems Nominal"
     }
-    // Workflow Data Translations
-    , "Slack Notification Bridge": "Slack Notification Bridge",
-    "Customer Data Sync": "Customer Data Sync",
-    "Monthly Billing Auto-Gen": "Monthly Billing Auto-Gen",
-    "Stripe Webhook Handler": "Stripe Webhook Handler",
-    "Customer Onboarding Sync": "Customer Onboarding Sync",
-    "Stripe Transaction Webhook": "Stripe Transaction Webhook",
-    "Data Warehouse Export": "Data Warehouse Export",
-    "Slack Alerting Router": "Slack Alerting Router",
-    "Today, 14:22:04": "Today, 14:22:04",
-    "Today, 14:18:55": "Today, 14:18:55",
-    "Today, 13:45:12": "Today, 13:45:12",
-    "Today, 13:12:00": "Today, 13:12:00",
-    "2 mins ago": "2 mins ago",
-    "14 mins ago": "14 mins ago",
-    "Failed 2h ago": "Failed 2h ago",
-    "Just now": "Just now",
-    "1.2s": "1.2s",
-    "458ms": "458ms",
-    "8.4s": "8.4s",
-    "210ms": "210ms",
-    "1.4s": "1.4s",
-    "0.8s": "0.8s",
-    "42s": "42s",
-    "0.2s": "0.2s",
-    "2h ago": "2h ago"
   },
   ar: {
     sidebar: {
@@ -507,9 +485,9 @@ const translations = {
       search: "بحث...",
       viewAll: "عرض الكل",
       adminAccess: "وصول المسؤول",
-      userName: "أليكس ريفيرو",
+      userName: "اسم المستخدم",
       adminUser: "مستخدم مسؤول",
-      adminEmail: "admin@precision.io",
+      adminEmail: "user@example.com",
       of: "من",
       results: "نتائج",
       step: "خطوة",
@@ -552,10 +530,10 @@ const translations = {
       deployingMsg: "جاري تطبيق التكوين والنشر...",
       privacy: "الخصوصية",
       apiTitle: "بيانات اعتماد واجهة البرمجيات",
-      apiSubtitle: "إدارة المفاتيح الآمنة لعمليات التكامل الخارجية.",
+      apiSubtitle: "",
       billingTitle: "ملخص الفواتير",
-      billingSubtitle: "فئة Professional Plus • الفاتورة القادمة في 12 أكتوبر 2024",
-      nextBill: "الفاتورة القادمة في 12 أكتوبر 2024",
+      billingSubtitle: "",
+      nextBill: "",
       upgradePlan: "ترقية الخطة",
       security: "الأمان",
       dataScrubbing: "تنظيف البيانات",
@@ -572,12 +550,7 @@ const translations = {
       dataStorage: "تخزين البيانات",
       updatePayment: "تحديث الدفع",
       transactionHistory: "سجل المعاملات",
-      downloadPdf: "تحميل PDF",
-      apiData: {
-        prodEngine: "محرك الإنتاج الرئيسي",
-        stagingEngine: "بيئة التطوير التجريبية",
-        discordBot: "بوت Discord Webhook"
-      }
+      downloadPdf: "تحميل PDF"
     },
     dashboard: {
       title: "لوحة تحكم المحرك",
@@ -591,12 +564,6 @@ const translations = {
       nodesOptimal: "جميع العقد تعمل ضمن المعايير المثالية",
       noRecent: "لم يتم العثور على عمليات تنفيذ حديثة.",
       successRateTitle: "معدل النجاح (آخر 7 أيام)",
-      data: {
-        slackBridge: "جسر إشعارات Slack",
-        dataSync: "مزامنة بيانات العملاء",
-        billingAuto: "إنشاء تلقائي للفواتير الشهرية",
-        stripeWebhook: "معالج خطاف ويب Stripe"
-      },
       stats: {
         workflows: "إجمالي سير العمل",
         executions: "إجمالي عمليات التنفيذ",
@@ -639,11 +606,19 @@ const translations = {
         noResults: "لم يتم العثور على نتائج لـ"
       },
       data: {
-        dataSync: "محرك مزامنة البيانات",
-        userOnboarding: "سير تهيئة المستخدم",
+        dataSync: "مزامنة البيانات السحابية",
+        userOnboarding: "تدفق تهيئة المستخدم",
         billingCalc: "حاسبة الفواتير",
         inventoryMonitor: "مراقب المخزون",
-        slackRelay: "مرحل إشعارات Slack"
+        slackRelay: "محرك ترحيل Slack"
+      },
+      envs: {
+        production: "الإنتاج",
+        staging: "بيئة الاختبار"
+      },
+      sources: {
+        webhook: "خطاف الويب",
+        schedule: "جدولة"
       },
       details: {
         title: "تفاصيل التنفيذ",
@@ -657,7 +632,8 @@ const translations = {
         copyJson: "نسخ JSON",
         errorMsg: "رسالة الخطأ",
         steps: "خطوات التنفيذ",
-        reexecute: "إعادة تنفيذ"
+        reexecute: "إعادة تنفيذ",
+        viewBuilder: "عرض في المنشئ"
       }
     },
     projects: {
@@ -666,19 +642,6 @@ const translations = {
       createBtn: "إنشاء مشروع جديد",
       searchPlaceholder: "البحث عن مشاريع أو علامات...",
       defaultTag: "نشط",
-      neural: {
-        title: "نبض التغذية العصبية",
-        desc: "خط تحليل المشاعر الآلي لإشارات السوق العالمية.",
-        load: "حمل النظام",
-        api: "استجابة API",
-        vectors: "مزامنة المتجهات"
-      },
-      health: {
-        title: "حالة سلامة المحرك",
-        cluster: "عنقود ألفا الرئيسي",
-        bus: "ناقل رسائل الأحداث",
-        db: "طبقة قاعدة البيانات الدائمة"
-      },
       terminal: {
         title: "محطة سجل النظام"
       },
@@ -693,7 +656,10 @@ const translations = {
         operational: "قيد التشغيل",
         optimized: "محسّن",
         lastSync: "آخر مزامنة منذ {{time}}",
-        active: "نشط"
+        active: "نشط",
+        usEastCluster: "مجموعة شرق الولايات المتحدة",
+        euWestCluster: "مجموعة غرب الاتحاد الأوروبي",
+        globalCdn: "شبكة توصيل المحتوى العالمية"
       },
       details: {
         workflows: "سير العمل النشط",
@@ -705,27 +671,25 @@ const translations = {
         settings: "الإعدادات",
         openDash: "فتح لوحة التحكم"
       },
-      data: {
-        logistics: "الخدمات اللوجستية العالمية",
-        logisticsDesc: "إدارة سلسلة التوريد وتحسين المسار.",
-        cyber: "معلومات تهديدات الإنترنت",
-        cyberDesc: "بروتوكولات الكشف التلقائي عن التهديدات وحظر بروتوكول الإنترنت.",
-        cloud: "مرحل السحاب المتعدد",
-        cloudDesc: "بروتوكولات الكشف التلقائي عن التهديدات وحظر بروتوكول الإنترنت.",
-        routeOptimizer: "محسن المسار",
-        invoiceGen: "منشئ الفواتير",
-        compliance: "مدقق الامتثال"
-      },
       tags: { high: "أولوية عالية" },
       alerts: { failedLogs: "تم اكتشاف سجلات فاشلة" },
       badges: { syncing: "جاري المزامنة" },
-      createCard: { title: "مشروع جديد", subtitle: "تهيئة مساحة عمل عقدة فارغة" },
       terminalLogs: {
-        nodeOk: "جميع العقد تعمل بشكل مثالي.",
-        sslOk: "تم التحقق من شهادات SSL.",
-        collabOk: "مصافحة جديدة ناجحة.",
-        checkOk: "اجتاز فحص السلامة."
+        collabOk: "عقد التعاون تعمل."
       },
+      health: {
+          title: "صحة النظام"
+        },
+      templatesPanel: {
+        standard: "قياسي",
+        desc: "تسلسل أتمتة جاهز للنشر."
+      },
+      neural: {
+        title: "تغذية عصبية",
+        desc: "مراقبة نشاط المحرك في الوقت الفعلي وتحليلات أداء العقد.",
+        load: "تحميل النظام"
+      },
+      createCard: { title: "مشروع جديد", subtitle: "" },
       modal: {
         title: "إنشاء مشروع",
         name: "اسم المشروع",
@@ -791,6 +755,9 @@ const translations = {
       teamTitle: "إدارة الفريق",
       workspaceEnv: "بيئة مساحة العمل",
       nodeDist: "توزيع العقد",
+      usEast: "شرق الولايات المتحدة",
+      euCentral: "وسط أوروبا",
+      apSoutheast: "جنوب شرق آسيا",
       dataRetention: "احتفاظ البيانات",
       dangerZone: "منطقة الخطر", // Already exists
       terminate: "إنهاء الحساب", // Already exists
@@ -828,17 +795,10 @@ const translations = {
       marketplaceTitle: "سوق المحرك",
       marketplaceDesc: "اكتشف العقد المجتمعية وكتل المنطق.",
       getNotified: "احصل على إشعارات",
-      sarahName: "سارة تشن",
-      sarahRole: "كبير مهندسي الواجهة الأمامية",
-      marcusName: "ماركوس ثورن",
-      marcusRole: "مطور خلفية",
       adminBadge: "مسؤول",
       memberBadge: "عضو",
-      usEast: "us-east-1",
-      euCentral: "eu-central-1",
-      apSoutheast: "ap-southeast-1",
       languageValues: "الإنجليزية، العربية",
-      timezoneValue: "جرينتش+02:00 (القاهرة)"
+      timezoneValue: "UTC -05:00 (EST)"
     },
     builder: {
       defaultName: "سير أتمتة جديد",
@@ -860,6 +820,17 @@ const translations = {
       greaterThan: "أكبر من",
       val: "قيمة",
       logicConfig: "تكوين المنطق",
+      nodeFields: {
+        url: "رابط الويب هوك",
+        method: "طريقة HTTP",
+        headers: "الترويسات",
+        body: "جسم الطلب",
+        cron: "الجدولة (Cron)",
+        code: "محرر النصوص البرمجية",
+        retries: "عدد المحاولات",
+        timeout: "المهلة (ملي ثانية)",
+        placeholder: "أدخل القيمة..."
+      },
       library: "مكتبة العقد",
       triggers: "المشغلات",
       logic: "المنطق",
@@ -873,24 +844,42 @@ const translations = {
       },
       nodesList: {
         webhookTrigger: "مشغل Webhook",
-        paymentFailed: "payment.failed",
-        configureStep: "تكوين الخطوة...",
         webhook: "Webhook",
-        schedule: "جدولة",
-        javascript: "JavaScript",
-        conditional: "شرطي",
-        sendEmail: "إرسال بريد إلكتروني",
+        schedule: "جدولة زمنية",
+        javascript: "جافا سكريبت / كود",
+        conditional: "شرطي (إذا/وإلا)",
+        email: "إرسال بريد إلكتروني",
         slackMessage: "رسالة Slack",
-        database: "قاعدة بيانات",
-        jsonTransform: "تحويل JSON"
+        database: "عملية قاعدة بيانات",
+        jsonTransform: "تحويل JSON",
+        httpRequest: "طلب HTTP",
+        cloudStorage: "تخزين سحابي",
+        ai: "مساعد الذكاء الاصطناعي",
+        whatsapp:"رسالة WhatsApp",
+        ai_agent: "مساعد ذكاء اصطناعي",
+        notification: "إشعار نظام",
+        filter: "تصفية البيانات",
+        wait: "انتظار / تأخير",
+        googleDrive: "جوجل درايف",
+        chatgpt: "ChatGPT",
+        discord: "رسالة Discord",
+        telegram: "بوت Telegram",
+        paymentFailed: "حدث فشل الدفع",
+        configureStep: "تكوين الخطوة..."
       },
       properties: "الخصائص",
       test: "اختبار",
-      save: "حفظ"
+      save: "حفظ",
+      configActive: "التكوين نشط",
+      requiresSetup: "يتطلب إعداداً"
     },
     notifications: {
       title: "الإشعارات",
       systemUpdate: "تحديث النظام",
+        executionAlert: "تنبيه تنفيذ",
+        latencyDetected: "تم اكتشاف زمن استجابة عالٍ في عنقود ألفا.",
+        apiKeyGenerated: "تم إنشاء مفتاح واجهة برمجة تطبيقات جديد.",
+        timeRecent: "منذ قليل",
       deployed: "تم نشر المحرك v2.4.0 بنجاح.",
       time2h: "منذ ساعتين",
       builder: "المصمم",
@@ -898,13 +887,10 @@ const translations = {
       executionError: "خطأ في التنفيذ",
       failedMsg: "فشل مزامنة ��يانات العملاء.",
       markRead: "تحديد الكل كمقروء",
-      apiKeyGenerated: "تم إنشاء مفتاح واجهة برمجة تطبيقات جديد.",
-      timeRecent: "منذ قليل",
-      executionAlert: "تنبيه تنفيذ",
-      latencyDetected: "تم اكتشاف زمن استجابة عالٍ في عنقود ألفا."
     },
     support: {
       title: "مركز الدعم",
+        community: "منتدى المجتمع",
       quickLinks: "روابط سريعة",
       apiReference: "مرجع واجهة البرمجيات",
       contactUs: "اتصل بنا",
@@ -913,48 +899,45 @@ const translations = {
       chatBtn: "تحدث مع الدعم",
       systemStatus: "حالة النظام",
       nominal: "جميع الأنظمة تعمل بشكل طبيعي",
-      community: "منتدى المجتمع"
     },
-    // Workflow Data Translations
-    "Slack Notification Bridge": "جسر إشعارات Slack",
-    "Customer Data Sync": "مزامنة بيانات العملاء",
-    "Monthly Billing Auto-Gen": "إنشاء تلقائي للفواتير الشهرية",
-    "Stripe Webhook Handler": "معالج خطاف ويب Stripe",
-    "Customer Onboarding Sync": "مزامنة تهيئة العملاء",
-    "Stripe Transaction Webhook": "خطاف معاملات Stripe",
-    "Data Warehouse Export": "تصدير مستودع البيانات",
-    "Slack Alerting Router": "راوتر تنبيهات Slack",
-    "Today, 14:22:04": "اليوم، 14:22:04",
-    "Today, 14:18:55": "اليوم، 14:18:55",
-    "Today, 13:45:12": "اليوم، 13:45:12",
-    "Today, 13:12:00": "اليوم، 13:12:00",
-    "2 mins ago": "منذ دقيقتين",
-    "14 mins ago": "منذ 14 دقيقة",
-    "Failed 2h ago": "فشل منذ ساعتين",
-    "Just now": "الآن",
-    "1.2s": "1.2 ثانية",
-    "458ms": "458 مللي ثانية",
-    "8.4s": "8.4 ثانية",
-    "210ms": "210 مللي ثانية",
-    "1.4s": "1.4 ثانية",
-    "0.8s": "0.8 ثانية",
-    "42s": "42 ثانية",
-    "0.2s": "0.2 ثانية",
-    "2h ago": "منذ ساعتين"
   },
 };
 
+// Generic values for account settings
+translations.en.account.languageValues = "English, Arabic";
+translations.ar.account.languageValues = "الإنجليزية، العربية";
+
 export const LanguageProvider = ({ children }) => {
   const [lang, setLang] = useState(localStorage.getItem('appLang') || 'en');
+  const [translationCache, setTranslationCache] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('appLang', lang);
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    document.documentElement.lang = lang;
+    
+    // Smooth transition effect
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.2s ease-in-out';
+    
+    setTimeout(() => {
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = lang;
+      document.body.style.opacity = '1';
+    }, 200);
   }, [lang]);
 
   const t = (path, params = {}) => {
-    let translation = path.split('.').reduce((obj, key) => obj?.[key], translations[lang]) || path;
+    if (!path) return "";
+    
+    let translation = path.split('.').reduce((obj, key) => obj?.[key], translations[lang]);
+    
+    if (translation === undefined) {
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`Missing translation for key: ${path} in language: ${lang}`);
+      }
+      return path; // Fallback to the key itself
+    }
+
     if (typeof translation === 'string') {
       Object.entries(params).forEach(([key, value]) => {
         translation = translation.split(`{{${key}}}`).join(value);
@@ -963,11 +946,64 @@ export const LanguageProvider = ({ children }) => {
     return translation;
   };
 
+  // Translates dynamic text using Google Translate API (via the api service)
+  const translateText = useCallback(async (text, sourceLang = 'en') => {
+    if (!text || lang === sourceLang) return text;
+    
+    const cacheKey = `${lang}:${text}`;
+    if (translationCache[cacheKey]) {
+      return translationCache[cacheKey];
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await api.translate(text, lang, sourceLang);
+      const translated = result.translatedText;
+      
+      setTranslationCache(prev => ({
+        ...prev,
+        [cacheKey]: translated
+      }));
+      
+      return translated;
+    } catch (error) {
+      console.error('Dynamic translation failed:', error);
+      return text;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [lang, translationCache]);
+
   return (
-    <LanguageContext.Provider value={{ lang, setLang, t }}>
+    <LanguageContext.Provider value={{ lang, setLang, t, translateText, isLoading }}>
       {children}
     </LanguageContext.Provider>
   );
+};
+
+// Reusable component for "Auto-Translation" of any dynamic string
+export const AutoTranslate = ({ children }) => {
+  const { lang, translateText } = useTranslation();
+  const [translated, setTranslated] = useState(children);
+
+  useEffect(() => {
+    if (typeof children === 'string' && children.trim().length > 0) {
+      translateText(children).then(setTranslated);
+    } else {
+      setTranslated(children);
+    }
+  }, [children, lang, translateText]);
+
+  return <>{translated}</>;
+};
+
+// Hook for translating dynamic values in forms (e.g., placeholders, options)
+export const useAutoTranslate = () => {
+  const { lang, translateText } = useTranslation();
+  return useCallback(async (text) => {
+    if (!text || lang === 'en') return text;
+    return await translateText(text);
+  }, [lang, translateText]);
 };
 
 export const useTranslation = () => useContext(LanguageContext);

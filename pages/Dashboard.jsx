@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from "../LanguageContext";
+import { api } from "../service/api";
 import { 
   LayoutDashboard, Activity, Hammer, FileText, Blocks, Settings, 
   Search, Bell, HelpCircle, Plus, AlertTriangle, Zap, CheckCircle2, TrendingDown, ArrowUpRight,
@@ -14,14 +15,26 @@ const EngineDashboard = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [isDeploying, setIsDeploying] = useState(false);
+  const [stats, setStats] = useState({ workflows: 0, executions: 0, errors: 0 });
+  const [executions, setExecutions] = useState([]);
   const navigate = useNavigate();
 
-  const executions = useMemo(() => [
-    { name: "Slack Notification Bridge", id: "WFLOW-3462", time: "Today, 14:22:04", status: "SUCCESS", duration: "1.2s", color: "blue" },
-    { name: "Customer Data Sync", id: "WFLOW-1022", time: "Today, 14:18:55", status: "FAILED", duration: "458ms", color: "blue", isFailed: true },
-    { name: "Monthly Billing Auto-Gen", id: "WFLOW-0091", time: "Today, 13:45:12", status: "SUCCESS", duration: "8.4s", color: "blue" },
-    { name: "Stripe Webhook Handler", id: "WFLOW-3344", time: "Today, 13:12:00", status: "SUCCESS", duration: "210ms", color: "blue" },
-  ], []);
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        const [statsData, workflowsData] = await Promise.all([
+          api.getDashboardStats(),
+          api.getWorkflows()
+        ]);
+        setStats(statsData);
+        // Using first few workflows as mock executions for now if logs aren't filtered
+        setExecutions(workflowsData.slice(0, 5));
+      } catch (error) {
+        console.error("Dashboard loading failed", error);
+      }
+    };
+    loadDashboardData();
+  }, []);
 
   const filteredExecutions = useMemo(() => {
     return executions.filter(ex => 
@@ -134,21 +147,21 @@ const EngineDashboard = () => {
           <div className="grid grid-cols-3 gap-6 mb-8">
             <StatCard 
                 icon={<Activity className="text-blue-600" size={18}/>} 
-                value="42" 
+                value={stats.workflows} 
                 label={t("dashboard.stats.workflows")} 
                 trend={t("dashboard.trends.workflows")} 
                 trendColor="text-green-600 bg-green-50" 
             />
             <StatCard 
                 icon={<Zap className="text-yellow-500" size={18}/>} 
-                value="12.5k" 
+                value={stats.executions} 
                 label={t("dashboard.stats.executions")} 
                 trend={t("dashboard.trends.executions")} 
                 trendColor="text-blue-600 bg-blue-50" 
             />
             <StatCard 
                 icon={<AlertTriangle className="text-red-500" size={18}/>} 
-                value="3" 
+                value={stats.errors} 
                 label={t("dashboard.stats.errors")} 
                 trend={t("dashboard.trends.errors")} 
                 trendColor="text-red-600 bg-red-50" 
@@ -169,7 +182,6 @@ const EngineDashboard = () => {
                 </div>
               </div>
               <div className="relative h-64 w-full">
-                {/* SVG Area Chart Mockup */}
                 <svg className="w-full h-full overflow-visible" viewBox="0 0 800 200" preserveAspectRatio="none">
                     <defs>
                         <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
@@ -177,9 +189,8 @@ const EngineDashboard = () => {
                             <stop offset="100%" stopColor="#0061E0" stopOpacity="0" />
                         </linearGradient>
                     </defs>
-                    <path d="M0,100 C100,100 150,140 200,140 C300,140 350,60 450,60 C550,60 600,140 700,40 L800,80 L800,200 L0,200 Z" fill="url(#chartGradient)" />
-                    <path d="M0,100 C100,100 150,140 200,140 C300,140 350,60 450,60 C550,60 600,140 700,40 L800,80" fill="none" stroke="#0061E0" strokeWidth="3" />
-                    <circle cx="700" cy="40" r="6" fill="white" stroke="#0061E0" strokeWidth="3" />
+                    <path d="M0,150 L800,150 L800,200 L0,200 Z" fill="url(#chartGradient)" />
+                    <path d="M0,150 L800,150" fill="none" stroke="#e2e8f0" strokeWidth="2" strokeDasharray="4" />
                 </svg>
                 <div className="flex justify-between mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     {['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].map(day => <span key={day}>{t(`dashboard.days.${day}`)}</span>)}
@@ -190,25 +201,25 @@ const EngineDashboard = () => {
             {/* Integrity Card */}
             <div className="col-span-1 bg-[#232a3b] rounded-2xl p-8 text-white flex flex-col">
                 <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase mb-1">{t("dashboard.integrity")}</p>
-                <h3 className="text-4xl font-black mb-8 tracking-tight">98.4%</h3>
+                <h3 className="text-4xl font-black mb-8 tracking-tight">0%</h3>
                 
                 <div className="space-y-6">
                     <div>
                         <div className="flex justify-between text-[11px] font-bold mb-2">
                             <span className="text-slate-400">{t("dashboard.latency")}</span>
-                            <span className="text-green-400">24ms</span>
+                            <span className="text-green-400">0ms</span>
                         </div>
                         <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                            <div className="bg-green-400 h-full w-[24%]"></div>
+                            <div className="bg-green-400 h-full w-[0%]"></div>
                         </div>
                     </div>
                     <div>
                         <div className="flex justify-between text-[11px] font-bold mb-2">
                             <span className="text-slate-400">{t("dashboard.cpu")}</span>
-                            <span className="text-slate-300">12%</span>
+                            <span className="text-slate-300">0%</span>
                         </div>
                         <div className="h-1.5 bg-slate-700 rounded-full overflow-hidden">
-                            <div className="bg-white/40 h-full w-[12%]"></div>
+                            <div className="bg-white/40 h-full w-[0%]"></div>
                         </div>
                     </div>
                 </div>
@@ -277,11 +288,11 @@ const NotificationPanel = ({ isOpen, onClose }) => {
       <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">{t("notifications.title")}</h3>
       <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><X size={18} /></button>
     </div>
-    <div className="flex-1 overflow-y-auto p-4 space-y-3">
+    <div className="flex-1 overflow-y-auto p-4 space-y-3"> 
       <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100">
         <p className="text-[10px] font-black text-blue-600 uppercase mb-1">{t("notifications.systemUpdate")}</p>
         <p className="text-xs font-bold text-slate-800">{t("notifications.deployed")}</p>
-        <p className="text-[10px] text-slate-400 mt-2">{t("notifications.time2h")}</p>
+        <p className="text-[10px] text-slate-400 mt-2">{t("notifications.time2h")}</p> 
       </div>
       <div className="p-3 bg-red-50/50 rounded-xl border border-red-100">
         <p className="text-[10px] font-black text-red-600 uppercase mb-1">{t("notifications.executionError")}</p>
@@ -307,10 +318,10 @@ const SupportPanel = ({ isOpen, onClose }) => {
       <div>
         <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">{t("support.quickLinks")}</h4>
         <div className="space-y-2">
-          <a href="#" className="flex items-center justify-between p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all group">
+          <a href="#" className="flex items-center justify-between p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all group"> 
             {t("header.docs")} <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
-          <a href="#" className="flex items-center justify-between p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all group">
+          <a href="#" className="flex items-center justify-between p-3 bg-slate-50 rounded-xl text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700 transition-all group"> 
             {t("support.apiReference")} <ArrowUpRight size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
         </div>

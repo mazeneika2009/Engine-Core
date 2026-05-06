@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from "../LanguageContext";
+import { api } from "../service/api";
 import { 
-  LayoutDashboard, Activity, Hammer, FileText, Blocks, Settings, 
+  LayoutDashboard, Activity, Hammer, FileText, Blocks, Settings, User, 
   Search, Bell, HelpCircle, Plus, Filter, ChevronLeft, ChevronRight,
   Lightbulb, ArrowRight, Code, Globe, Database, BellRing,
   Menu, X
@@ -22,12 +23,13 @@ const WorkflowsPage = () => {
   const itemsPerPage = 2;
   const navigate = useNavigate();
 
-  const [workflowsList, setWorkflowsList] = useState([
-    { id: "WF-9921-X", name: "Customer Onboarding Sync", time: "2 mins ago", duration: "1.4s", rate: 100, active: true, isError: false, icon: <Code size={18} className="text-blue-600" /> },
-    { id: "WF-2104-Y", name: "Stripe Transaction Webhook", time: "14 mins ago", duration: "0.8s", rate: 98.4, active: true, isError: false, icon: <Globe size={18} className="text-blue-600" /> },
-    { id: "WF-0023-A", name: "Data Warehouse Export", time: "Failed 2h ago", duration: "42s", rate: 45.2, active: false, isError: true, icon: <Database size={18} className="text-red-600" /> },
-    { id: "WF-1188-C", name: "Slack Alerting Router", time: "Just now", duration: "0.2s", rate: 100, active: true, isError: false, icon: <BellRing size={18} className="text-blue-600" /> },
-  ]);
+  const [workflowsList, setWorkflowsList] = useState([]);
+
+  useEffect(() => {
+    api.getWorkflows()
+      .then(setWorkflowsList)
+      .catch(err => console.error("Failed to fetch workflows", err));
+  }, []);
 
   const filteredWorkflows = useMemo(() => {
     return workflowsList.filter(wf => {
@@ -95,7 +97,7 @@ const WorkflowsPage = () => {
             <NavItem to="/logs" icon={<FileText size={18} />} label={t("sidebar.logs")} onClick={() => setIsSidebarOpen(false)} />
             <NavItem to="/projects" icon={<Blocks size={18} />} label={t("sidebar.projects")} onClick={() => setIsSidebarOpen(false)} />
             <NavItem to="/settings" icon={<Settings size={18} />} label={t("sidebar.settings")} onClick={() => setIsSidebarOpen(false)} />
-            <NavItem to="/account" icon={<Settings size={18} />} label={t("sidebar.account")} onClick={() => setIsSidebarOpen(false)} />
+            <NavItem to="/account" icon={<User size={18} />} label={t("sidebar.account")} onClick={() => setIsSidebarOpen(false)} />
           </nav>
         </div>
         <div className="mt-auto p-6 space-y-6">
@@ -179,25 +181,25 @@ const WorkflowsPage = () => {
           <div className="grid grid-cols-4 gap-4 mb-10">
             <AccentCard 
               label={t("workflows.stats.totalExecutions")} 
-              value="1.2M" 
-              sub="+12%" 
+              value="0" 
+              sub="+0%" 
               borderColor="border-blue-600" 
               onClick={() => setStatusFilter('all')}
               active={statusFilter === 'all'}
             />
             <AccentCard 
               label={t("workflows.stats.successRate")} 
-              value="99.98%" 
+              value="0%" 
               sub={t("workflows.stats.performance")} 
               borderColor="border-green-600" 
               subColor="text-green-600" 
               onClick={() => setStatusFilter('active')}
               active={statusFilter === 'active'}
             />
-            <AccentCard label={t("workflows.stats.activeNodes")} value="412" sub="v2.4.0" borderColor="border-slate-800" />
+            <AccentCard label={t("workflows.stats.activeNodes")} value="0" sub="v2.4.0" borderColor="border-slate-800" />
             <AccentCard 
               label={t("workflows.stats.failedRuns")} 
-              value="14" 
+              value="0" 
               sub={t("workflows.stats.attention")} 
               borderColor="border-red-600" 
               subColor="text-red-600" 
@@ -360,11 +362,11 @@ const NotificationPanel = ({ isOpen, onClose }) => {
       <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">{t("notifications.title")}</h3>
       <button onClick={onClose} className="p-2 hover:bg-slate-50 rounded-full text-slate-400"><X size={18} /></button>
     </div>
-    <div className="flex-1 overflow-y-auto p-4 space-y-3">
+    <div className="flex-1 overflow-y-auto p-4 space-y-3"> 
       <div className="p-3 bg-blue-50/50 rounded-xl border border-blue-100">
         <p className="text-[10px] font-black text-blue-600 uppercase mb-1">{t("notifications.systemUpdate")}</p>
         <p className="text-xs font-bold text-slate-800">{t("notifications.deployed")}</p>
-        <p className="text-[10px] text-slate-400 mt-2">{t("notifications.time2h")}</p>
+        <p className="text-[10px] text-slate-400 mt-2">{t("notifications.time2h")}</p> 
       </div>
       <div className="p-3 bg-red-50/50 rounded-xl border border-red-100">
         <p className="text-[10px] font-black text-red-600 uppercase mb-1">{t("notifications.executionError")}</p>
@@ -372,7 +374,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
         <p className="text-[10px] text-slate-400 mt-2">{t("notifications.timeRecent")}</p>
       </div>
       <div className="p-3 bg-slate-50 rounded-xl">
-        <p className="text-[10px] font-black text-slate-500 uppercase mb-1">{t("settings.security")}</p>
+        <p className="text-[10px] font-black text-slate-500 uppercase mb-1">{t("settings.security")}</p> 
         <p className="text-xs font-bold text-slate-800">{t("notifications.apiKeyGenerated")}</p>
         <p className="text-[10px] text-slate-400 mt-2">{t("common.yesterday")}</p>
       </div>

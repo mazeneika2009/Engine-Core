@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from "../LanguageContext";
+import { api } from "../service/api";
 import { 
   LayoutDashboard, Activity, Hammer, FileText, Blocks, Settings, User, 
   Plus, Monitor, Shield, Cloud, CheckCircle, ChevronRight,
@@ -21,11 +22,13 @@ const ProjectsDashboard = () => {
   const [newProject, setNewProject] = useState({ title: '', description: '', tag: t("projects.defaultTag") });
   const navigate = useNavigate();
 
-  const [projects, setProjects] = useState([
-    { id: 1, title: "projects.data.logistics", description: "projects.data.logisticsDesc", isFeatured: true, tag: "projects.tags.high", color: "text-blue-600" },
-    { id: 2, title: "projects.data.cyber", description: "projects.data.cyberDesc", icon: <Shield size={18}/>, alert: "projects.alerts.failedLogs" },
-    { id: 3, title: "projects.data.cloud", description: "projects.data.cloudDesc", icon: <Cloud size={18}/>, badge: "projects.badges.syncing" },
-  ]);
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    api.getProjects()
+      .then(setProjects)
+      .catch(err => console.error("Failed to fetch projects", err));
+  }, []);
 
   const featuredProject = useMemo(() => projects.find(p => p.isFeatured), [projects]);
 
@@ -162,10 +165,10 @@ const ProjectsDashboard = () => {
 
           {/* Top Summary Stats */}
           <div className="grid grid-cols-4 gap-4 mb-8">
-            <SummaryCard label={t("projects.stats.nodes")} value="1,248" trend="+12.5%" trendLabel={t("projects.trends.cycle")} trendUp />
-            <SummaryCard label={t("projects.stats.activeFlows")} value="84" dotColor="bg-green-500" sub={t("projects.status.operational")} />
-            <SummaryCard label={t("projects.stats.latency")} value="12ms" icon={<Activity size={12} className="text-blue-500" />} sub={t("projects.status.optimized")} />
-            <SummaryCard label={t("projects.stats.efficiency")} value="99.9%" progress={99.9} />
+            <SummaryCard label={t("projects.stats.nodes")} value="0" trend="0%" trendLabel={t("projects.trends.cycle")} trendUp />
+            <SummaryCard label={t("projects.stats.activeFlows")} value={projects.length.toString()} dotColor="bg-green-500" sub={t("projects.status.operational")} />
+            <SummaryCard label={t("projects.stats.latency")} value="0ms" icon={<Activity size={12} className="text-blue-500" />} sub={t("projects.status.optimized")} />
+            <SummaryCard label={t("projects.stats.efficiency")} value="0%" progress={0} />
           </div>
 
           {/* Main Projects Grid */}
@@ -191,29 +194,16 @@ const ProjectsDashboard = () => {
                     <div>
                         <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-4">{t("projects.details.workflows")}</h4>
                         <ul className="space-y-3">
-                            <li className="flex items-center gap-2 text-xs font-bold text-slate-600"><div className="w-1.5 h-1.5 rounded-full bg-green-500"></div> {t("projects.data.routeOptimizer")}</li>
-                            <li className="flex items-center gap-2 text-xs font-bold text-slate-600"><div className="w-1.5 h-1.5 rounded-full bg-green-500"></div> {t("projects.data.invoiceGen")}</li>
-                            <li className="flex items-center gap-2 text-xs font-bold text-slate-300"><div className="w-1.5 h-1.5 rounded-full bg-slate-200"></div> {t("projects.data.compliance")}</li>
+                            <li className="text-xs text-slate-400 italic">{t("dashboard.noRecent")}</li>
                         </ul>
                     </div>
                     <div>
                         <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-4">{t("projects.details.teamAssets")}</h4>
-                        <div className="flex -space-x-2">
-                            {[1, 2, 3].map(i => (
-                                <div key={i} className="w-8 h-8 rounded-lg border-2 border-white bg-slate-200 overflow-hidden">
-                                    <img src={`https://i.pravatar.cc/150?u=${i}`} alt="avatar" />
-                                </div>
-                            ))}
-                            <div className="w-8 h-8 rounded-lg border-2 border-white bg-blue-50 text-blue-600 text-[10px] font-bold flex items-center justify-center">+4</div>
-                        </div>
+                        <div className="text-[10px] text-slate-400 font-bold">{t("account.managingTeam")}</div>
                     </div>
                     <div>
                         <h4 className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-4">{t("projects.details.heatmap")}</h4>
-                        <div className="flex items-end gap-1.5 h-12">
-                            {[20, 30, 45, 25, 40, 80, 70].map((h, i) => (
-                                <div key={i} style={{ height: `${h}%` }} className={`flex-1 rounded-sm ${h > 60 ? 'bg-blue-600' : 'bg-blue-100'}`}></div>
-                            ))}
-                        </div>
+                        <div className="h-12 bg-slate-50 rounded border border-dashed border-slate-200"></div>
                     </div>
                 </div>
 
@@ -222,7 +212,7 @@ const ProjectsDashboard = () => {
                         <span className="cursor-pointer hover:underline">{t("projects.actions.viewArch")}</span>
                         <span className="cursor-pointer hover:underline">{t("projects.actions.settings")}</span>
                     </div>
-                    <span className="text-[9px] font-bold text-slate-300 uppercase">{t("projects.status.lastSync", { time: "4m" })}</span>
+                    <span className="text-[9px] font-bold text-slate-300 uppercase">{t("projects.status.lastSync", { time: "N/A" })}</span>
                 </div>
             </div>
             )}
@@ -238,17 +228,14 @@ const ProjectsDashboard = () => {
                 <div className="bg-slate-50 p-4 rounded-xl mb-6">
                     <div className="flex justify-between text-[10px] font-bold mb-2">
                         <span className="text-slate-400">{t("projects.neural.load")}</span>
-                        <span className="text-slate-900">72%</span>
+                        <span className="text-slate-900">0%</span>
                     </div>
                     <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                        <div className="bg-blue-600 h-full w-[72%]"></div>
+                        <div className="bg-blue-600 h-full w-[0%]"></div>
                     </div>
                 </div>
 
-                <div className="space-y-3 mb-8">
-                    <StatusItem label={t("projects.neural.api")} active />
-                    <StatusItem label={t("projects.neural.vectors")} active />
-                </div>
+                <div className="space-y-3 mb-8"></div>
 
                 <button className="w-full border border-slate-200 text-slate-600 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest hover:bg-slate-50 transition-colors mt-auto">
                     {t("projects.actions.openDash")}
@@ -278,9 +265,6 @@ const ProjectsDashboard = () => {
             <div className="col-span-5">
                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">{t("projects.health.title")}</h4>
                 <div className="space-y-4">
-                    <HealthRow label={t("projects.health.cluster")} status="green" />
-                    <HealthRow label={t("projects.health.bus")} status="green" />
-                    <HealthRow label={t("projects.health.db")} status="blue" />
                 </div>
             </div>
 
@@ -290,10 +274,6 @@ const ProjectsDashboard = () => {
                     <MoreHorizontal size={14} />
                 </div>
                 <div className="font-mono text-[11px] space-y-1.5">
-                    <p className="text-green-400"><span className="text-slate-500 mr-2">[OK]</span> {t("projects.terminalLogs.nodeOk")}</p>
-                    <p className="text-green-400"><span className="text-slate-500 mr-2">[OK]</span> {t("projects.terminalLogs.sslOk")}</p>
-                    <p className="text-blue-300"><span className="text-slate-500 mr-2">[INFO]</span> {t("projects.terminalLogs.collabOk")}</p>
-                    <p className="text-green-400"><span className="text-slate-500 mr-2">[OK]</span> {t("projects.terminalLogs.checkOk")}</p>
                 </div>
             </div>
           </div>
@@ -385,7 +365,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
         <p className="text-xs font-bold text-slate-800">{t("notifications.deployed")}</p>
       </div>
       <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
-        <p className="text-[10px] font-black text-slate-500 uppercase mb-1">{t("sidebar.projects")}</p>
+        <p className="text-[10px] font-black text-slate-500 uppercase mb-1">{t("projects.title")}</p>
         <p className="text-xs font-bold text-slate-800">{t("projects.terminalLogs.collabOk")}</p>
       </div>
     </div>
@@ -445,15 +425,15 @@ const StatusPanel = ({ isOpen, onClose }) => {
     <div className="p-6 space-y-6">
       <div>
         <div className="flex justify-between items-center mb-2">
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t("dashboard.latency")}</span>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t("common.latency")}</span>
           <span className="text-xs font-bold text-green-600">99.9%</span>
         </div>
         <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden"><div className="h-full bg-green-500 w-[99%]"></div></div>
       </div>
       <div className="space-y-3">
-        {['US-East Cluster', 'EU-West Cluster', 'Global CDN'].map(reg => (
+        {[t("projects.status.usEastCluster"), t("projects.status.euWestCluster"), t("projects.status.globalCdn")].map(reg => (
           <div key={reg} className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-600">{reg}</span>
+            <span className="text-xs font-bold text-slate-600">{t(`projects.clusterStatus.${reg}`)}</span>
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           </div>
         ))}
