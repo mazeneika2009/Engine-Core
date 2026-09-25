@@ -1,0 +1,12 @@
+{
+  "name": "shared",
+  "version": "2.4.0",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./types": "./src/types/index.js",
+    "./schemas": "./src/schemas/index.js",
+    "./expressions": "./src/expressions.js"
+  }
+}

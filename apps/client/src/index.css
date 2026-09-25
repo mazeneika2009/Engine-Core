@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    @apply bg-base text-cream font-sans;
+    font-feature-settings: "cv11", "ss01";
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: rgba(132, 169, 140, 0.35);
+    color: #F5F1EA;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.16) transparent;
+  }
+  *::-webkit-scrollbar { width: 8px; height: 8px; }
+  *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.14); border-radius: 99px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* React Flow — warm charcoal canvas */
+.react-flow__attribution { display: none; }
+.react-flow__node { font-family: Inter, system-ui, sans-serif; }
+.react-flow__node-workflowNode { background: transparent; border: none; }
+.react-flow__edge-path {
+  stroke: #78716C !important;
+  stroke-width: 1.5px !important;
+}
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: #84A98C !important;
+}
+.react-flow__handle {
+  width: 9px !important;
+  height: 9px !important;
+  background: #1C1917 !important;
+  border: 1.5px solid #78716C !important;
+  border-radius: 99px !important;
+}
+.react-flow__handle:hover {
+  border-color: #84A98C !important;
+  background: #84A98C !important;
+}
+.react-flow__minimap { background: #232120 !important; }
+.react-flow__controls { box-shadow: none !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 8px !important; overflow: hidden; }
+.react-flow__controls-button { background: #232120 !important; border-bottom: 1px solid rgba(255,255,255,0.07) !important; }
+.react-flow__controls-button:hover { background: #2A2724 !important; }
+.react-flow__controls-button svg { fill: #A8A29E !important; }
+
+@layer components {
+  .label-caps { @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-smoke; }
+  .card-flat { @apply bg-panel rounded-xl; border: 1px solid rgba(255,255,255,0.08); }
+  .btn-primary { @apply text-[13px] font-semibold rounded-lg px-4 py-2 transition-all active:scale-[0.98] disabled:opacity-60; background: #84A98C; color: #1C1917; }
+  .btn-primary:hover { background: #9AB9A0; }
+  .btn-quiet { @apply text-[13px] font-medium rounded-lg px-4 py-2 transition-colors text-cream/90 hover:bg-white/[0.06]; border: 1px solid rgba(255,255,255,0.1); background: transparent; }
+  .btn-clay { @apply text-[13px] font-semibold rounded-lg px-4 py-2 transition-all active:scale-[0.98] disabled:opacity-60; background: #C08552; color: #1C1917; }
+  .btn-clay:hover { background: #D4A373; }
+  .btn-danger-quiet { @apply text-[13px] font-medium rounded-lg px-4 py-2 transition-colors hover:bg-white/[0.06]; color: #C96A5E; border: 1px solid rgba(201,106,94,0.3); background: transparent; }
+  .field { @apply w-full rounded-lg px-3 py-2 text-[13px] font-medium text-cream outline-none placeholder:text-smoke placeholder:font-normal; background: #1C1917; border: 1px solid rgba(255,255,255,0.1); }
+  .field:focus { border-color: rgba(132,169,140,0.5); }
+  select.field { cursor: pointer; }
+  select.field option { background: #232120; }
+}
